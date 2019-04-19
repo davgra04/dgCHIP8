@@ -4,13 +4,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "time.h"
+#include "instruction.h"
 
-#define SIZE_PROGRAM        3232    // num bytes, first 0x200 bytes are unused to mimic CHIP-8 system memory
-#define SIZE_STACK          16      // num 16-bit values
-#define SIZE_DISPLAY        256     // num bytes
-#define NUM_REGISTERS       16      // num 16-bit registers
-#define RESOLUTION_X        64
-#define RESOLUTION_Y        32
+#define CHIP8_CLOCK 500         // Hz
+#define SCREEN_REFRESH_CLOCK 60 // Hz
+#define SIZE_PROGRAM 3232       // num bytes, first 0x200 bytes are unused to mimic CHIP-8 system memory
+#define SIZE_STACK 16           // num 16-bit values
+#define SIZE_DISPLAY 256        // num bytes
+#define NUM_REGISTERS 16        // num 16-bit registers
+#define RESOLUTION_X 64
+#define RESOLUTION_Y 32
 
 unsigned char program[SIZE_PROGRAM];
 unsigned char display[SIZE_DISPLAY];
@@ -46,10 +49,15 @@ void push_stack(unsigned short address);
 unsigned short pop_stack();
 
 // program memory functions
-unsigned char read_display_byte(unsigned short address);
 unsigned char read_program_byte(unsigned short address);
 unsigned short read_program_short(unsigned short address);
 
-void load_program(char* path);
+unsigned char read_display_byte(unsigned short address);
+unsigned short read_display_short(unsigned short address);
+void write_display_short(unsigned short address, unsigned short value);
+
+void load_program(char *path);
+
+void step_emulation();
 
 #endif // CHIP8_H

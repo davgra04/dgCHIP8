@@ -2,6 +2,7 @@ CXX = clang
 SDL = -F /Library/Frameworks -framework SDL2 -framework SDL2_ttf
 CXXFLAGS = -Wall -c
 LDFLAGS = $(SDL)
+# LDFLAGS = $(SDL) -lprofiler
 EXE = dgchip8
 TEST_EXE = test_dgchip8
 
@@ -10,7 +11,7 @@ TEST_EXE = test_dgchip8
 
 all: $(EXE)
 
-$(EXE): main.o global.o chip8.o instruction.o display.o
+$(EXE): main.o global.o chip8.o instruction.o sdlio.o
 	$(CXX) $(LDFLAGS) $? -o $@
 
 main.o: src/main.c src/global.h src/instruction.h
@@ -25,7 +26,7 @@ chip8.o: src/chip8.c src/chip8.h
 instruction.o: src/instruction.c src/instruction.h
 	$(CXX) $(CXXFLAGS) $< -o $@
 
-display.o: src/display.c src/display.h
+sdlio.o: src/sdlio.c src/sdlio.h
 	$(CXX) $(CXXFLAGS) $< -o $@
 
 # TEST

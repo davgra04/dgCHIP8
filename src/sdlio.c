@@ -1,6 +1,9 @@
 #include "sdlio.h"
 
-void initialize_SDL()
+// initialization
+////////////////////////////////////////////////////////////////////////////////
+
+void initialize_SDL_subsystems()
 {
     int pos_x = 100;
     int pos_y = 100;
@@ -10,7 +13,7 @@ void initialize_SDL()
     int win_debug_h = 480;
 
     // initialize SDL subsystems
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
         printf("SDL_Init Error: %s\n", SDL_GetError());
         return;
@@ -57,6 +60,18 @@ void initialize_SDL()
         quit_SDL();
         return;
     }
+}
+
+void initialize_SDL_timers()
+{
+    // SDL_AddTimer(500, my_callback, NULL);
+    emulation_timer = SDL_AddTimer(100, emulation_step_callback, NULL);
+    display_timer = SDL_AddTimer(170, display_callback, NULL);
+}
+
+void initialize_SDL()
+{
+    initialize_SDL_subsystems();
 
     // load font
     font = TTF_OpenFont("fonts/SourceCodePro-Bold.ttf", 16);
@@ -69,7 +84,34 @@ void initialize_SDL()
 
     fg_color = (SDL_Color){255, 255, 255, 255};
     bg_color = (SDL_Color){0, 0, 0, 255};
+
+    initialize_SDL_timers();
 }
+
+// timer callbacks
+////////////////////////////////////////////////////////////////////////////////
+
+// Uint32 my_callback(Uint32 interval, void *param)
+// {
+//     printf("my event called! %d\n", interval);
+//     return interval;
+// }
+
+Uint32 emulation_step_callback(Uint32 interval, void *param)
+{
+    step_emulation();
+    return interval;
+}
+
+Uint32 display_callback(Uint32 interval, void *param)
+{
+    update_screen_display();
+    update_screen_debug();
+    return interval;
+}
+
+// screen drawing
+////////////////////////////////////////////////////////////////////////////////
 
 void update_screen_display()
 {
@@ -100,13 +142,14 @@ void update_screen_display()
         }
     }
 
-    // draw pixel grid
-    SDL_SetRenderDrawColor(ren_display, 0, 160, 255, 255);
-    for (int i=0; i < SIZE_DISPLAY*8; i++) {
-        pixel.x = i % RESOLUTION_X * PIXEL_SCALE;
-        pixel.y = i / RESOLUTION_X * PIXEL_SCALE;
-        SDL_RenderDrawRect(ren_display, &pixel);
-    }
+    // // draw pixel grid
+    // SDL_SetRenderDrawColor(ren_display, 0, 160, 255, 255);
+    // for (int i = 0; i < SIZE_DISPLAY * 8; i++)
+    // {
+    //     pixel.x = i % RESOLUTION_X * PIXEL_SCALE;
+    //     pixel.y = i / RESOLUTION_X * PIXEL_SCALE;
+    //     SDL_RenderDrawRect(ren_display, &pixel);
+    // }
 
     SDL_RenderPresent(ren_display);
 }
@@ -224,45 +267,66 @@ void update_screen_debug()
     SDL_RenderPresent(ren_debug);
 }
 
-// void print_key_details(SDL_Event *e)
-// {
-//     printf("SDL_KEYDOWN Event    type:%d    timestamp:%d    state:%d    repeat:%d    keysym:%s\n", e->key.type, e->key.timestamp, e->key.state, e->key.repeat, e->key.keysym);
-// }
+// run emulation
+////////////////////////////////////////////////////////////////////////////////
 
-// void handle_key_event(SDL_KeyboardEvent *k)
-// {
-//     if (e->type == SDLK_SPACE) {
-//         printf("Spacebar detected!\n");
-//     }
-// }
-
-void handle_SDL_events()
+void run_emulation()
 {
+
     while (SDL_PollEvent(&e))
     {
         if (e.type == SDL_QUIT)
         {
             quit = 1;
         }
-        else if (e.type == SDL_KEYDOWN)
+        // else if (e.type == SDL_KEYDOWN)
+        // {
+        //     printf("SDL_KEYDOWN Event    type:%d    timestamp:%d    state:%d    repeat:%d    keysym:%i\n", e.key.type, e.key.timestamp, e.key.state, e.key.repeat, e.key.keysym.sym);
+        //     // print_key_details(&e);
+        //     // handle_key_event(&e);
+        //     if (e.key.keysym.sym == SDLK_SPACE)
+        //     {
+        //         // printf("stepping emulation\n");
+        //         step_emulation();
+        //     }
+        // }
+
+        else if (e.type == SDL_USEREVENT)
         {
-            printf("SDL_KEYDOWN Event    type:%d    timestamp:%d    state:%d    repeat:%d    keysym:%i\n", e.key.type, e.key.timestamp, e.key.state, e.key.repeat, e.key.keysym.sym);
-            // print_key_details(&e);
-            // handle_key_event(&e);
-            if (e.key.keysym.sym == SDLK_SPACE) {
-                // printf("stepping emulation\n");
-                step_emulation();
-            }
+            /* and now we can call the function we wanted to call in the timer but couldn't because of the multithreading problems */
+            void (*p)(void *) = e.user.data1;
+            p(e.user.data2);
         }
     }
 }
 
 void quit_SDL()
 {
+
+    // // wait a minute
+    // for (int i = 0; i < 100000; i++)
+    // {
+    //     for (int j = 0; j < 100000; j++)
+    //     {
+    //     }
+    // }
+
+    printf("debug01\n");
+    // SDL_RemoveTimer(emulation_timer);
+    printf("debug02\n");
+    // SDL_RemoveTimer(display_timer);
+    printf("debug03\n");
     TTF_CloseFont(font);
+    printf("debug04\n");
+    printf("ren_display: %p\n", ren_display);
     SDL_DestroyRenderer(ren_display);
+    printf("debug05\n");
     SDL_DestroyRenderer(ren_debug);
+    printf("debug06\n");
     SDL_DestroyWindow(win_display);
+    printf("debug07\n");
     SDL_DestroyWindow(win_debug);
+    printf("debug08\n");
     SDL_Quit();
+    printf("debug09\n");
 }

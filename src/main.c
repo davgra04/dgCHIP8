@@ -1,35 +1,42 @@
 #include "global.h"
 #include "chip8.h"
 #include "instruction.h"
-#include "display.h"
+#include "sdlio.h"
 // #include <SDL2/SDL.h>
 
+void read_args(int argc, char **argv)
+{
+
+    for (int i = 0; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-f") == 0)
+        {
+            FREEZE_CLOCK = 1;
+        }
+    }
+
+    strcpy(GAME_PATH, argv[argc - 1]);
+
+    printf("FREEZE_CLOCK: %d\n", FREEZE_CLOCK);
+    printf("GAME_PATH:    %s\n", GAME_PATH);
+}
+
 // main routine
-int main()
+int main(int argc, char **argv)
 {
     printf("Heyo Boyo\n");
 
     PIXEL_SCALE = 8;
     QUIT = 0;
 
-    // dump_program();   //print all memory values
-    // dump_registers(); //print all register values
-
+    read_args(argc, argv);
     initialize_chip8();
     initialize_SDL();
-
-    checkerboard_display();
-    dump_display();
-
-    load_program("games/TETRIS");
+    load_program(GAME_PATH);
 
     while (!quit)
     {
-        // step_emulation();
-        // random_display();
-        update_screen_display();
-        update_screen_debug();
-        handle_SDL_events();
+        run_emulation();
     }
 
     quit_SDL();

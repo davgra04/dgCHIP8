@@ -152,11 +152,6 @@ unsigned short pop_stack()
 
 // memory access functions
 
-unsigned char read_display_byte(unsigned short address)
-{
-    return program[address];
-}
-
 unsigned char read_program_byte(unsigned short address)
 {
     return program[address];
@@ -167,19 +162,48 @@ unsigned short read_program_short(unsigned short address)
     return (program[address] << 8) + program[address + 1];
 }
 
-void load_program(char* path)
+unsigned char read_display_byte(unsigned short address)
 {
-    FILE* f = fopen(path, "rb");
+    return display[address];
+}
+
+unsigned short read_display_short(unsigned short address)
+{
+    return (display[address % SIZE_DISPLAY] << 8) + display[(address + 1) % SIZE_DISPLAY];
+}
+
+void write_display_short(unsigned short address, unsigned short value)
+{
+    display[address % SIZE_DISPLAY] = (value >> 0x8) & 0xFF;
+    display[(address + 1) % SIZE_DISPLAY] = value & 0xFF;
+}
+
+void load_program(char *path)
+{
+    FILE *f = fopen(path, "rb");
+    if (f == NULL)
+    {
+        printf("failed to open path: %s\n", path);
+        exit(1);
+    }
     fseek(f, 0, SEEK_END);
     long fsize = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    if (fsize > SIZE_PROGRAM-0x200) {
+    if (fsize > SIZE_PROGRAM - 0x200)
+    {
         printf("Cannot load program, too big!\n");
         exit(1);
     }
 
     fread(program + 0x200, 1, fsize, f);
     fclose(f);
+}
 
+void step_emulation()
+{
+    unsigned short instruction = read_program_short(program_counter);
+    program_counter += 2;
+    // printf("executing instruction 0x%04x...\n", instruction);
+    execute_instruction(instruction);
 }
