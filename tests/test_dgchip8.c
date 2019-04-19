@@ -9,38 +9,7 @@ int tests_run = 0;
 
 // HELPER FUNCTIONS
 
-void clear_program() {
-    for(int i=0; i<SIZE_PROGRAM; i++) {
-        program[i] = 0x00;
-    }
-}
-
-void clear_stack() {
-    for(int i=0; i<SIZE_STACK; i++) {
-        stack[i] = 0x00;
-    }
-    stack_ptr = 0x0;
-}
-
-void clear_registers() {
-    for(int i=0; i<NUM_REGISTERS; i++) {
-        reg[i] = 0x00;
-    }
-    reg_I = 0x0;
-    sound_timer = 0x0;
-    delay_timer = 0x0;
-}
-
-void initialize_system() {
-    clear_program();
-    clear_stack();
-    instruction_clear_screen();
-    clear_registers();
-
-    program_counter = 0x200;
-}
-
-void write_short_to_program(short address, short value) {
+void write_short_to_program(unsigned short address, unsigned short value) {
     program[address] = (value >> 8) & 0xff;
     program[address + 1] = value & 0xff;
 }
@@ -109,9 +78,9 @@ static char* test_call_jump_return() {
     // dump_program();
 
 
-    short instruction;
+    unsigned short instruction;
 
-    instruction = read_instruction(program_counter++);
+    instruction = read_program_short(program_counter++);
     printf("executing instruction 0x%04x...\n", instruction);
     execute_instruction(instruction);
     // dump_stack();
@@ -120,12 +89,12 @@ static char* test_call_jump_return() {
     mu_assert("test_call_jump_return failed, subroutine instruction: bad first stack value", stack[0] == 0x201);
     // exit(0);
 
-    instruction = read_instruction(program_counter++);
+    instruction = read_program_short(program_counter++);
     printf("executing instruction 0x%04x...\n", instruction);
     execute_instruction(instruction);
     mu_assert("test_call_jump_return failed, jump instruction: bad program_counter value", program_counter == 0x240);
 
-    instruction = read_instruction(program_counter++);
+    instruction = read_program_short(program_counter++);
     printf("executing instruction 0x%04x...\n", instruction);
     execute_instruction(instruction);
     mu_assert("test_call_jump_return failed, jump instruction: bad program_counter value", program_counter == 0x201);
