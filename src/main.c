@@ -1,12 +1,11 @@
 #include "chip8.h"
 #include "global.h"
 #include "instruction.h"
-#include "sdlio.h"
+#include "sdl_io.h"
 
 #include <stdio.h>
 #include <sys/time.h>
 #include <unistd.h>
-// #include <SDL2/SDL.h>
 
 void read_args(int argc, char **argv) {
   for (int i = 0; i < argc; i++) {
@@ -31,59 +30,50 @@ int main(int argc, char **argv) {
   read_args(argc, argv);
   initialize_chip8();
   initialize_SDL();
+  load_font_data("fonts/FONTSPRITE1");
   load_program(GAME_PATH);
 
-  // while (!quit)
-  // {
-  //     run_emulation();
-  // }
+  // dump_program();
+  // exit(0);
 
+  // set up timing vars
   struct timeval tv1, tv2;
-  gettimeofday(&tv1, NULL);
-  printf("tv1.tv_sec:  %ld\n", tv1.tv_sec);
-  printf("tv1.tv_usec: %d\n", tv1.tv_usec);
-
   long diff, slpamt;
-  long cycle_period = 2000;  // usec
-  // long cycle_period = 50000;  // usec
+  long cycle_period = 1000000 / CHIP8_CLOCK;
+  int cycles_per_display = CHIP8_CLOCK / SCREEN_REFRESH_CLOCK;
+  int cycles_per_timer_dec = CHIP8_CLOCK / TIMER_DECREMENT_CLOCK;
+  // long cycle_period = 1000000;
+  // int cycles_per_display = 1;
+  // int cycles_per_timer_dec = 1;
 
-  SDL_Event e;
-  int i=0;
+  int i = 0;
 
+  // TODO: consider executing multiple instructions per loop based on timing
   while (!QUIT) {
-    // for (int i = 0; i < NUM_TRIALS; i++) {
     gettimeofday(&tv1, NULL);
-    // printf("tv1: %lds %dus\n", tv1.tv_sec, tv1.tv_usec);
-    //
-    //  DO CALCULATION
-    //
 
+    poll_SDL_events();
     step_emulation();
-    if (i % 8 == 0) {
-      while (SDL_PollEvent(&e)) {
-        if (e.type == SDL_QUIT) {
-          QUIT = 1;
-        }
-      }
+    if (i % cycles_per_display == 0) {
       update_screen_display();
       update_screen_debug();
     }
-    //
-    //
+    if (i % cycles_per_timer_dec == 0) {
+      decrement_timers();
+    }
+
+    // sleep until end of cycle
     gettimeofday(&tv2, NULL);
-    // printf("tv2: %lds %dus\n", tv2.tv_sec, tv2.tv_usec);
     diff = (tv2.tv_sec - tv1.tv_sec) * 1000000 + (tv2.tv_usec - tv1.tv_usec);
     slpamt = cycle_period - diff;
-    printf("diff: %ld\n\n", diff);
+    // printf("diff: %ld\n", diff);
     if (slpamt > 0) {
-      printf("sleeping: %ld\n\n", slpamt);
+      // printf("    sleeping: %ld\n", slpamt);
       usleep(slpamt);
     }
 
     i++;
   }
-
-  usleep(1000000);
 
   quit_SDL();
 

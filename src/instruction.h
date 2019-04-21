@@ -3,6 +3,7 @@
 
 #include "global.h"
 #include "chip8.h"
+#include "sdl_io.h"
 
 // dummy functions
 int return_four();
@@ -30,6 +31,10 @@ void instruction_load_regI(unsigned short instruction);
 void instruction_jump_reg(unsigned short instruction);
 void instruction_rand(unsigned short instruction);
 void instruction_draw_sprite(unsigned short instruction);
+void instruction_skip_key(unsigned short instruction);
+void instruction_skip_not_key(unsigned short instruction);
+void instruction_read_timer(unsigned short instruction);
+void instruction_wait_for_key(unsigned short instruction);
 
 
 // executes an instruction

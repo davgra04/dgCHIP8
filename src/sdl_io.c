@@ -1,4 +1,4 @@
-#include "sdlio.h"
+#include "sdl_io.h"
 
 // initialization
 ////////////////////////////////////////////////////////////////////////////////
@@ -72,12 +72,6 @@ void initialize_SDL_subsystems() {
   }
 }
 
-void initialize_SDL_timers() {
-  // SDL_AddTimer(500, my_callback, NULL);
-  emulation_timer = SDL_AddTimer(100, emulation_step_callback, NULL);
-  display_timer = SDL_AddTimer(170, display_callback, NULL);
-}
-
 void initialize_SDL() {
   initialize_SDL_subsystems();
 
@@ -89,30 +83,12 @@ void initialize_SDL() {
     return;
   }
 
+  for (int i = 0; i < NUM_BUTTONS; i++) {
+    button_state[i] = 0;
+  }
+
   fg_color = (SDL_Color){255, 255, 255, 255};
   bg_color = (SDL_Color){0, 0, 0, 255};
-
-  // initialize_SDL_timers();
-}
-
-// timer callbacks
-////////////////////////////////////////////////////////////////////////////////
-
-// Uint32 my_callback(Uint32 interval, void *param)
-// {
-//     printf("my event called! %d\n", interval);
-//     return interval;
-// }
-
-Uint32 emulation_step_callback(Uint32 interval, void *param) {
-  step_emulation();
-  return interval;
-}
-
-Uint32 display_callback(Uint32 interval, void *param) {
-  update_screen_display();
-  update_screen_debug();
-  return interval;
 }
 
 // screen drawing
@@ -165,7 +141,7 @@ void text_color_white() { fg_color = (SDL_Color){255, 255, 255, 255}; }
 void text_color_highlight() { fg_color = (SDL_Color){0, 160, 255, 255}; }
 
 void render_debug_text(const char *text, int x, int y) {
-  text_surface = TTF_RenderText(font, text, fg_color, bg_color);
+  text_surface = TTF_RenderText_Solid(font, text, fg_color);
   if (text_surface == NULL) {
     printf("TTF_RenderText Error: %s\n", TTF_GetError());
     free_text_resources();
@@ -251,59 +227,117 @@ void update_screen_debug() {
 // run emulation
 ////////////////////////////////////////////////////////////////////////////////
 
-void run_emulation() {
-  while (SDL_PollEvent(&e)) {
-    if (e.type == SDL_QUIT) {
-      quit = 1;
-    }
-    // else if (e.type == SDL_KEYDOWN)
-    // {
-    //     printf("SDL_KEYDOWN Event    type:%d    timestamp:%d    state:%d
-    //     repeat:%d    keysym:%i\n", e.key.type, e.key.timestamp, e.key.state,
-    //     e.key.repeat, e.key.keysym.sym);
-    //     // print_key_details(&e);
-    //     // handle_key_event(&e);
-    //     if (e.key.keysym.sym == SDLK_SPACE)
-    //     {
-    //         // printf("stepping emulation\n");
-    //         step_emulation();
-    //     }
-    // }
+int chip8_key_to_sdl_key(int chip8_key) {
+  switch (chip8_key) {
+    case 0x0:
+      return SDLK_0;
+    case 0x1:
+      return SDLK_1;
+    case 0x2:
+      return SDLK_2;
+    case 0x3:
+      return SDLK_3;
+    case 0x4:
+      return SDLK_4;
+    case 0x5:
+      return SDLK_5;
+    case 0x6:
+      return SDLK_6;
+    case 0x7:
+      return SDLK_7;
+    case 0x8:
+      return SDLK_8;
+    case 0x9:
+      return SDLK_9;
+    case 0xA:
+      return SDLK_a;
+    case 0xB:
+      return SDLK_b;
+    case 0xC:
+      return SDLK_c;
+    case 0xD:
+      return SDLK_d;
+    case 0xE:
+      return SDLK_e;
+    case 0xF:
+      return SDLK_f;
+    default:
+      return -1;
+  }
+}
 
-    else if (e.type == SDL_USEREVENT) {
-      /* and now we can call the function we wanted to call in the timer but
-       * couldn't because of the multithreading problems */
-      void (*p)(void *) = e.user.data1;
-      p(e.user.data2);
+int sdl_key_to_chip8_key(int sdl_key) {
+  switch (sdl_key) {
+    case SDLK_0:
+      return 0x0;
+    case SDLK_1:
+      return 0x1;
+    case SDLK_2:
+      return 0x2;
+    case SDLK_3:
+      return 0x3;
+    case SDLK_4:
+      return 0x4;
+    case SDLK_5:
+      return 0x5;
+    case SDLK_6:
+      return 0x6;
+    case SDLK_7:
+      return 0x7;
+    case SDLK_8:
+      return 0x8;
+    case SDLK_9:
+      return 0x9;
+    case SDLK_a:
+      return 0xA;
+    case SDLK_b:
+      return 0xB;
+    case SDLK_c:
+      return 0xC;
+    case SDLK_d:
+      return 0xD;
+    case SDLK_e:
+      return 0xE;
+    case SDLK_f:
+      return 0xF;
+    default:
+      return -1;
+  }
+}
+
+void poll_SDL_events() {
+  // reset keydown states
+  for (int i = 0; i < NUM_BUTTONS; i++) {
+    button_keydown[i] = 0;
+  }
+
+  while (SDL_PollEvent(&e)) {
+    switch (e.type) {
+      case SDL_QUIT:
+        QUIT = 1;
+        break;
+      case SDL_KEYDOWN:
+        // printf("KEYDOWN: %d\n", e.key.keysym.sym);
+        if (e.key.keysym.sym < NUM_BUTTONS) {
+          button_state[e.key.keysym.sym] = 1;
+          button_keydown[e.key.keysym.sym] = 1;
+        }
+        break;
+      case SDL_KEYUP:
+        if (e.key.keysym.sym < NUM_BUTTONS) button_state[e.key.keysym.sym] = 0;
+        break;
+      default:
+        break;
     }
   }
 }
 
 void quit_SDL() {
-  // // wait a minute
-  // for (int i = 0; i < 100000; i++)
-  // {
-  //     for (int j = 0; j < 100000; j++)
-  //     {
-  //     }
-  // }
-
-  printf("debug01\n");
-  // SDL_RemoveTimer(emulation_timer);
-  printf("debug02\n");
-  // SDL_RemoveTimer(display_timer);
-  printf("debug03\n");
+  printf("Closing SDL resources\n");
   TTF_CloseFont(font);
-  printf("debug04\n");
-  printf("ren_display: %p\n", ren_display);
   SDL_DestroyRenderer(ren_display);
-  printf("debug05\n");
   SDL_DestroyRenderer(ren_debug);
-  printf("debug06\n");
   SDL_DestroyWindow(win_display);
-  printf("debug07\n");
   SDL_DestroyWindow(win_debug);
-  printf("debug08\n");
   SDL_Quit();
-  printf("debug09\n");
 }

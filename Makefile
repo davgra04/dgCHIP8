@@ -11,7 +11,7 @@ TEST_EXE = test_dgchip8
 
 all: $(EXE)
 
-$(EXE): main.o global.o chip8.o instruction.o sdlio.o
+$(EXE): main.o global.o chip8.o instruction.o sdl_io.o
 	$(CXX) $(LDFLAGS) $? -o $@
 
 main.o: src/main.c src/global.h src/instruction.h
@@ -26,7 +26,7 @@ chip8.o: src/chip8.c src/chip8.h
 instruction.o: src/instruction.c src/instruction.h
 	$(CXX) $(CXXFLAGS) $< -o $@
 
-sdlio.o: src/sdlio.c src/sdlio.h
+sdl_io.o: src/sdl_io.c src/sdl_io.h
 	$(CXX) $(CXXFLAGS) $< -o $@
 
 # TEST

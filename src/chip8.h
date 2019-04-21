@@ -3,15 +3,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "time.h"
 #include "instruction.h"
+#include "time.h"
 
-#define CHIP8_CLOCK 500         // Hz
-#define SCREEN_REFRESH_CLOCK 60 // Hz
-#define SIZE_PROGRAM 3232       // num bytes, first 0x200 bytes are unused to mimic CHIP-8 system memory
-#define SIZE_STACK 16           // num 16-bit values
-#define SIZE_DISPLAY 256        // num bytes
-#define NUM_REGISTERS 16        // num 16-bit registers
+#define CHIP8_CLOCK 500           // Hz
+#define SCREEN_REFRESH_CLOCK 60   // Hz
+#define TIMER_DECREMENT_CLOCK 60  // Hz
+#define SIZE_PROGRAM 3232         // bytes
+#define SIZE_STACK 16             // shorts
+#define SIZE_DISPLAY 256          // bytes
+#define NUM_REGISTERS 16          // num 16-bit registers
 #define RESOLUTION_X 64
 #define RESOLUTION_Y 32
 
@@ -57,7 +58,10 @@ unsigned short read_display_short(unsigned short address);
 void write_display_short(unsigned short address, unsigned short value);
 
 void load_program(char *path);
+void load_font_data(char *path);
 
 void step_emulation();
 
-#endif // CHIP8_H
+void decrement_timers();
+
+#endif  // CHIP8_H

@@ -1,5 +1,5 @@
-#ifndef DISPLAY_H
-#define DISPLAY_H
+#ifndef SDL_IO_H
+#define SDL_IO_H
 
 #include "global.h"
 #include "chip8.h"
@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+
+#define NUM_BUTTONS 128
 
 SDL_Window *win_display;
 SDL_Renderer *ren_display;
@@ -26,18 +28,15 @@ SDL_TimerID emulation_timer;
 SDL_TimerID display_timer;
 
 SDL_Event e;
+
+int button_state[NUM_BUTTONS];
+int button_keydown[NUM_BUTTONS];
+
 // initialization
 ////////////////////////////////////////////////////////////////////////////////
 
 void initialize_SDL_subsystems();
-void initialize_SDL_timers();
 void initialize_SDL();
-
-// timer callbacks
-////////////////////////////////////////////////////////////////////////////////
-
-Uint32 emulation_step_callback(Uint32 interval, void *param);
-Uint32 display_callback(Uint32 interval, void *param);
 
 // screen drawing
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +51,9 @@ void update_screen_debug();
 // run emulation
 ////////////////////////////////////////////////////////////////////////////////
 
-void run_emulation();
+int chip8_key_to_sdl_key(int chip8_key);
+int sdl_key_to_chip8_key(int sdl_key);
+void poll_SDL_events();
 void quit_SDL();
 
-#endif // DISPLAY_H
+#endif // SDL_IO_H
