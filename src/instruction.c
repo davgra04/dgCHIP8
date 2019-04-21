@@ -34,7 +34,7 @@ void instruction_skip_equal_byte(unsigned short instruction) {
   unsigned char reg_idx = (instruction & 0x0F00) >> 8;
   unsigned char value = instruction & 0x00FF;
   if (reg[reg_idx] == value) {
-    program_counter++;  // extra increment of program counter
+    program_counter += 2;  // extra increment of program counter
   }
 }
 
@@ -44,7 +44,7 @@ void instruction_skip_not_equal_byte(unsigned short instruction) {
   unsigned char reg_idx = (instruction & 0x0F00) >> 8;
   unsigned char value = instruction & 0x00FF;
   if (reg[reg_idx] != value) {
-    program_counter++;  // extra increment of program counter
+    program_counter += 2;  // extra increment of program counter
   }
 }
 
@@ -54,7 +54,7 @@ void instruction_skip_equal_reg(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
   unsigned char reg_y = (instruction & 0x00F0) >> 4;
   if (reg[reg_x] == reg[reg_y]) {
-    program_counter++;  // extra increment of program counter
+    program_counter += 2;  // extra increment of program counter
   }
 }
 
@@ -191,7 +191,7 @@ void instruction_skip_not_equal_reg(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
   unsigned char reg_y = (instruction & 0x00F0) >> 4;
   if (reg[reg_x] != reg[reg_y]) {
-    program_counter++;  // extra increment of program counter
+    program_counter += 2;  // extra increment of program counter
   }
 }
 
@@ -267,7 +267,7 @@ void instruction_skip_key(unsigned short instruction) {
   int sdl_key = chip8_key_to_sdl_key(reg[reg_x]);
 
   if ((sdl_key != -1) && (button_state[sdl_key])) {
-    program_counter++;
+    program_counter += 2;
   }
 }
 
@@ -278,7 +278,7 @@ void instruction_skip_not_key(unsigned short instruction) {
   int sdl_key = chip8_key_to_sdl_key(reg[reg_x]);
 
   if ((sdl_key != -1) && (!button_state[sdl_key])) {
-    program_counter++;
+    program_counter += 2;
   }
 }
 
@@ -350,7 +350,7 @@ void instruction_load_BCD(unsigned short instruction) {
 // Store registers V0 through Vx in memory starting at location I.
 void instruction_load_multi(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
-  for (int i=0; i<reg_x; i++) {
+  for (int i = 0; i < reg_x; i++) {
     program[reg_I + i] = reg[i];
   }
 }
@@ -359,7 +359,7 @@ void instruction_load_multi(unsigned short instruction) {
 // Read registers V0 through Vx from memory starting at location I.
 void instruction_read_multi(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
-  for (int i=0; i<reg_x; i++) {
+  for (int i = 0; i < reg_x; i++) {
     reg[i] = program[reg_I + i];
   }
 }
