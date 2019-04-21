@@ -236,9 +236,11 @@ void instruction_draw_sprite(unsigned short instruction) {
   for (char i = 0; i < bytes; i++) {
     // printf("i: %d\n", i);
 
-    short_to_draw = read_program_byte(reg_I + i * 2);
+    // short_to_draw = read_program_byte(reg_I + i * 2);
+    short_to_draw = read_program_byte(reg_I + i);
     // printf("    short_to_draw1:    0x%x\n", short_to_draw);
     short_to_draw = short_to_draw << (8 - (x % 8));
+    // short_to_draw = short_to_draw & 0xFF;
     // printf("    short_to_draw2:    0x%x\n", short_to_draw);
 
     cur_display_addr = ((y + i) * RESOLUTION_X + x) / 8;
