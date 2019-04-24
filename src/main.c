@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
       gettimeofday(&t_last_timer_decrement, NULL);
 
       // offset time of timer decrement with leftover time from diff
-      t_sub.tv_usec = diff % cycle_period;
+      t_sub.tv_usec = diff % timer_period;
       timersub(&t_last_timer_decrement, &t_sub, &t_last_timer_decrement);
     }
 
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
       gettimeofday(&t_last_screen_refresh, NULL);
 
       // offset time of screen draw with leftover time from diff
-      t_sub.tv_usec = diff % cycle_period;
+      t_sub.tv_usec = diff % display_period;
       timersub(&t_last_screen_refresh, &t_sub, &t_last_screen_refresh);
     }
   }
