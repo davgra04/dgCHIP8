@@ -21,6 +21,11 @@ void instruction_jump(unsigned short instruction) {
 // Call subroutine at nnn.
 void instruction_call_subroutine(unsigned short instruction) {
   unsigned short address = instruction & 0x0FFF;
+
+  if (address < 0x0200) {
+    return;
+  }
+
   push_stack(program_counter);
   program_counter = address;
   // printf("DEBUG2: instruction: 0x%04x\n", instruction);
@@ -73,11 +78,11 @@ void instruction_add_byte(unsigned short instruction) {
   unsigned char value = instruction & 0x00FF;
 
   unsigned short sum = reg[reg_idx] + value;
-  if (sum > 0xFF) {
-    reg[0xF] = 0x1;
-  } else {
-    reg[0xF] = 0x0;
-  }
+  // if (sum & 0xFF00) {
+  //   reg[0xF] = 0x1;
+  // } else {
+  //   reg[0xF] = 0x0;
+  // }
 
   reg[reg_idx] = sum & 0xFF;
 }
@@ -120,7 +125,9 @@ void instruction_add_reg(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
   unsigned char reg_y = (instruction & 0x00F0) >> 4;
   unsigned short sum = reg[reg_x] + reg[reg_y];
+
   if (sum > 0xFF) {
+    // if (sum & 0xFF00) {
     reg[0xF] = 0x1;
   } else {
     reg[0xF] = 0x0;
@@ -134,6 +141,7 @@ void instruction_add_reg(unsigned short instruction) {
 void instruction_sub_reg(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
   unsigned char reg_y = (instruction & 0x00F0) >> 4;
+
   if (reg[reg_x] > reg[reg_y]) {
     reg[reg_x] = reg[reg_x] - reg[reg_y];
     reg[0xF] = 0x1;
@@ -142,12 +150,24 @@ void instruction_sub_reg(unsigned short instruction) {
     reg[reg_x] = sub & 0xFF;
     reg[0xF] = 0x0;
   }
+
+  // unsigned char twos_comp_y = (reg[reg_y] ^ 0xFF) + 1;
+  // unsigned short diff = reg[reg_x] + twos_comp_y;
+
+  // if (diff & 0xFF00) {
+  //   reg[0xF] = 0x0;
+  // } else {
+  //   reg[0xF] = 0x1;
+  // }
+
+  // reg[reg_x] = diff;
 }
 
 // 8xy6 - SHR Vx
 // Set Vx = Vx SHR 1.
 void instruction_shift_right(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
+
   if ((reg[reg_x] & 0x1) == 0x1) {
     reg[0xF] = 0x1;
   } else {
@@ -162,6 +182,7 @@ void instruction_shift_right(unsigned short instruction) {
 void instruction_subn_reg(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
   unsigned char reg_y = (instruction & 0x00F0) >> 4;
+
   if (reg[reg_y] > reg[reg_x]) {
     reg[reg_x] = reg[reg_y] - reg[reg_x];
     reg[0xF] = 0x1;
@@ -170,6 +191,17 @@ void instruction_subn_reg(unsigned short instruction) {
     reg[reg_x] = sub & 0xFF;
     reg[0xF] = 0x0;
   }
+
+  // unsigned char twos_comp_x = (reg[reg_y] ^ 0xFF) + 1;
+  // unsigned short diff = reg[reg_y] + twos_comp_x;
+
+  // if (diff & 0xFF00) {
+  //   reg[0xF] = 0x0;
+  // } else {
+  //   reg[0xF] = 0x1;
+  // }
+
+  // reg[reg_x] = diff;
 }
 
 // 8xyE - SHL Vx {, Vy}
@@ -335,7 +367,7 @@ void instruction_add_I_reg(unsigned short instruction) {
 void instruction_load_sprite(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
   if (reg[reg_x] < 16) {
-    reg_I = reg[reg_x] * 10;
+    reg_I = reg[reg_x] * 5;
   }
 }
 

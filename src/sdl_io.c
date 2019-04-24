@@ -4,8 +4,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 void initialize_SDL_subsystems() {
-  int pos_x = 100;
-  int pos_y = 100;
+  int pos_x = 20;
+  int pos_y = 20;
   int win_display_w = RESOLUTION_X * PIXEL_SCALE;
   int win_display_h = RESOLUTION_Y * PIXEL_SCALE;
   int win_debug_w = 600;

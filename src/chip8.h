@@ -9,7 +9,7 @@
 #define CHIP8_CLOCK 500           // Hz
 #define SCREEN_REFRESH_CLOCK 60   // Hz
 #define TIMER_DECREMENT_CLOCK 60  // Hz
-#define SIZE_PROGRAM 3232         // bytes
+#define SIZE_PROGRAM 4000         // bytes
 #define SIZE_STACK 16             // shorts
 #define SIZE_DISPLAY 256          // bytes
 #define NUM_REGISTERS 16          // num 16-bit registers

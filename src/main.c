@@ -24,7 +24,7 @@ void read_args(int argc, char **argv) {
 int main(int argc, char **argv) {
   printf("Heyo Boyo\n");
 
-  PIXEL_SCALE = 8;
+  PIXEL_SCALE = 10;
   QUIT = 0;
 
   read_args(argc, argv);
