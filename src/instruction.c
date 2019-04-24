@@ -353,7 +353,10 @@ void instruction_set_delay_timer(unsigned short instruction) {
 // Set sound timer = Vx.
 void instruction_set_sound_timer(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
-  sound_timer = reg[reg_x];
+  if (reg[reg_x] > 0) {
+    sound_timer = reg[reg_x];
+    start_beep();
+  }
 }
 
 // Fx1E - ADD I, Vx

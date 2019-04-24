@@ -1,5 +1,5 @@
 CXX = clang
-SDL = -F /Library/Frameworks -framework SDL2 -framework SDL2_ttf
+SDL = -F /Library/Frameworks -framework SDL2 -framework SDL2_ttf -framework SDL2_mixer
 CXXFLAGS = -Wall -c
 LDFLAGS = $(SDL)
 # LDFLAGS = $(SDL) -lprofiler

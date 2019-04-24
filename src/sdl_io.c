@@ -28,7 +28,7 @@ void initialize_SDL_subsystems() {
   }
 
   // initialize SDL subsystems
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
     printf("SDL_Init Error: %s\n", SDL_GetError());
     return;
   }
@@ -37,11 +37,17 @@ void initialize_SDL_subsystems() {
     printf("TTF_Init Error: %s\n", TTF_GetError());
     return;
   }
+
+  // initialize sdl mixer, open up the audio device
+  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
+    printf("Mix_OpenAudio Error: %s\n", Mix_GetError());
+    return;
+  }
 }
 
 void create_display_window() {
   // open a window for the display
-  win_display = SDL_CreateWindow(title, win_pos_x, win_pos_y, win_display_w,
+  win_display = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, win_display_w,
                                  win_display_h, SDL_WINDOW_SHOWN);
   if (win_display == NULL) {
     printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
@@ -94,6 +100,9 @@ void initialize_SDL() {
     return;
   }
 
+  // load beep
+  beep = Mix_LoadWAV("sounds/beep.wav");
+
   for (int i = 0; i < NUM_BUTTONS; i++) {
     button_state[i] = 0;
   }
@@ -102,6 +111,27 @@ void initialize_SDL() {
 
   fg_color = (SDL_Color){255, 255, 255, 255};
   bg_color = (SDL_Color){0, 0, 0, 255};
+}
+
+// beep sound
+////////////////////////////////////////////////////////////////////////////////
+int beep_playing;
+
+void start_beep() {
+  if (!beep_playing) {
+    if (Mix_PlayChannel(-1, beep, 0) < 0) {
+      printf("Error playing beep\n");
+      return;
+    }
+    beep_playing = 1;
+  }
+}
+
+void stop_beep() {
+  if (beep_playing) {
+    Mix_HaltChannel(-1);
+    beep_playing = 0;
+  }
 }
 
 // screen drawing
@@ -353,7 +383,10 @@ void poll_SDL_events() {
 
 void quit_SDL() {
   printf("Closing SDL resources\n");
+  Mix_FreeChunk(beep);
+  Mix_CloseAudio();
   TTF_CloseFont(font);
+  TTF_Quit();
   SDL_DestroyRenderer(ren_display);
   SDL_DestroyRenderer(ren_debug);
   SDL_DestroyWindow(win_display);

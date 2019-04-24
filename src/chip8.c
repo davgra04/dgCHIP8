@@ -199,6 +199,9 @@ void decrement_timers(int num_decrements) {
   for (int i = 0; i < num_decrements; i++) {
     if (sound_timer > 0) {
       sound_timer--;
+      if (sound_timer == 0) {
+        stop_beep();
+      }
     }
     if (delay_timer > 0) {
       delay_timer--;

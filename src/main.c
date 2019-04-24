@@ -16,7 +16,7 @@ void read_args(int argc, char** argv) {
 
   strcpy(GAME_PATH, argv[argc - 1]);
 
-  printf("FREEZE_CLOCK: %d\n", FREEZE_CLOCK);
+  // printf("FREEZE_CLOCK: %d\n", FREEZE_CLOCK);
   printf("GAME_PATH:    %s\n", GAME_PATH);
 }
 
@@ -26,9 +26,9 @@ long get_time_diff(struct timeval* tv1, struct timeval* tv2) {
 
 // main routine
 int main(int argc, char** argv) {
-  printf("Heyo Boyo\n");
+  // printf("Heyo Boyo\n");
 
-  PIXEL_SCALE = 10;
+  PIXEL_SCALE = 16;
   QUIT = 0;
 
   read_args(argc, argv);

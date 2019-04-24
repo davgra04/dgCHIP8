@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 
 #define NUM_BUTTONS 128
 
@@ -24,6 +25,8 @@ SDL_Texture *text_texture;
 SDL_Rect *text_rect;
 TTF_Font *font;
 
+Mix_Chunk* beep;
+
 SDL_TimerID emulation_timer;
 SDL_TimerID display_timer;
 
@@ -37,6 +40,11 @@ int button_keydown[NUM_BUTTONS];
 
 void initialize_SDL_subsystems();
 void initialize_SDL();
+
+// beep sound
+////////////////////////////////////////////////////////////////////////////////
+void start_beep();
+void stop_beep();
 
 // screen drawing
 ////////////////////////////////////////////////////////////////////////////////
