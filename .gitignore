@@ -2,4 +2,5 @@
 dgchip8
 test_dgchip8
 *.o
-
+env/
+*.old

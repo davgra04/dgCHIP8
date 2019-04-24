@@ -183,18 +183,25 @@ void load_font_data(char *path) {
   fclose(f);
 }
 
-void step_emulation() {
-  unsigned short instruction = read_program_short(program_counter);
-  program_counter += 2;
-  // printf("executing instruction 0x%04x...\n", instruction);
-  execute_instruction(instruction);
+void step_emulation(int num_steps) {
+
+  // printf("Executing %d steps\n", num_steps);
+
+  for (int i = 0; i < num_steps; i++) {
+    unsigned short instruction = read_program_short(program_counter);
+    program_counter += 2;
+    // printf("executing instruction 0x%04x...\n", instruction);
+    execute_instruction(instruction);
+  }
 }
 
-void decrement_timers() {
-  if (sound_timer > 0) {
-    sound_timer--;
-  }
-  if (delay_timer > 0) {
-    delay_timer--;
+void decrement_timers(int num_decrements) {
+  for (int i = 0; i < num_decrements; i++) {
+    if (sound_timer > 0) {
+      sound_timer--;
+    }
+    if (delay_timer > 0) {
+      delay_timer--;
+    }
   }
 }

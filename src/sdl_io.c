@@ -3,17 +3,21 @@
 // initialization
 ////////////////////////////////////////////////////////////////////////////////
 
+int win_pos_x, win_pos_y, win_display_w, win_display_h, win_debug_w,
+    win_debug_h;
+
+char* title_base = "dgchip8 - ";
+char* title;
+
 void initialize_SDL_subsystems() {
-  int pos_x = 20;
-  int pos_y = 20;
-  int win_display_w = RESOLUTION_X * PIXEL_SCALE;
-  int win_display_h = RESOLUTION_Y * PIXEL_SCALE;
-  int win_debug_w = 600;
-  int win_debug_h = 480;
+  win_pos_x = 20;
+  win_pos_y = 20;
+  win_display_w = RESOLUTION_X * PIXEL_SCALE;
+  win_display_h = RESOLUTION_Y * PIXEL_SCALE;
+  win_debug_w = 600;
+  win_debug_h = 480;
 
   // build title
-  char *title_base = "dgchip8 - ";
-  char *title;
   if ((title = malloc(strlen(title_base) + strlen(GAME_PATH) + 1)) != NULL) {
     title[0] = '\0';  // ensures the memory is an empty string
     strcat(title, title_base);
@@ -33,30 +37,14 @@ void initialize_SDL_subsystems() {
     printf("TTF_Init Error: %s\n", TTF_GetError());
     return;
   }
+}
 
-  // open a window for the debug
-  win_debug = SDL_CreateWindow("dgchip8 DEBUG", pos_x + win_display_w, pos_y,
-                               win_debug_w, win_debug_h, SDL_WINDOW_SHOWN);
-  if (win_debug == NULL) {
-    printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
-    quit_SDL();
-    return;
-  }
-
+void create_display_window() {
   // open a window for the display
-  win_display = SDL_CreateWindow(title, pos_x, pos_y, win_display_w,
+  win_display = SDL_CreateWindow(title, win_pos_x, win_pos_y, win_display_w,
                                  win_display_h, SDL_WINDOW_SHOWN);
   if (win_display == NULL) {
     printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
-    quit_SDL();
-    return;
-  }
-
-  // create renderer for the debug
-  ren_debug = SDL_CreateRenderer(win_debug, -1, SDL_RENDERER_ACCELERATED);
-  //   win_debug, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-  if (ren_debug == NULL) {
-    printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
     quit_SDL();
     return;
   }
@@ -72,8 +60,31 @@ void initialize_SDL_subsystems() {
   }
 }
 
+void create_debug_window() {
+  // open a window for the debug
+  win_debug =
+      SDL_CreateWindow("dgchip8 DEBUG", win_pos_x + win_display_w, win_pos_y,
+                       win_debug_w, win_debug_h, SDL_WINDOW_SHOWN);
+  if (win_debug == NULL) {
+    printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
+    quit_SDL();
+    return;
+  }
+
+  // create renderer for the debug
+  ren_debug = SDL_CreateRenderer(win_debug, -1, SDL_RENDERER_ACCELERATED);
+  //   win_debug, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  if (ren_debug == NULL) {
+    printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
+    quit_SDL();
+    return;
+  }
+}
+
 void initialize_SDL() {
   initialize_SDL_subsystems();
+  create_display_window();
+  // create_debug_window();
 
   // load font
   font = TTF_OpenFont("fonts/SourceCodePro-Bold.ttf", 16);
@@ -87,12 +98,17 @@ void initialize_SDL() {
     button_state[i] = 0;
   }
 
+  text_rect = &(SDL_Rect){0, 0, 0, 0};
+
   fg_color = (SDL_Color){255, 255, 255, 255};
   bg_color = (SDL_Color){0, 0, 0, 255};
 }
 
 // screen drawing
 ////////////////////////////////////////////////////////////////////////////////
+
+char current_display_byte;
+char masked;
 
 void update_screen_display() {
   SDL_SetRenderDrawColor(ren_display, 0, 0, 0, 255);
@@ -104,8 +120,6 @@ void update_screen_display() {
   pixel.h = PIXEL_SCALE;
 
   // draw pixels
-  char current_display_byte;
-  char masked;
   for (int i = 0; i < SIZE_DISPLAY; i++) {
     current_display_byte = display[i];
     for (int b = 0; b < 8; b++) {
@@ -140,7 +154,7 @@ void text_color_white() { fg_color = (SDL_Color){255, 255, 255, 255}; }
 
 void text_color_highlight() { fg_color = (SDL_Color){0, 160, 255, 255}; }
 
-void render_debug_text(const char *text, int x, int y) {
+void render_debug_text(const char* text, int x, int y) {
   text_surface = TTF_RenderText_Solid(font, text, fg_color);
   if (text_surface == NULL) {
     printf("TTF_RenderText Error: %s\n", TTF_GetError());
@@ -156,11 +170,17 @@ void render_debug_text(const char *text, int x, int y) {
   }
 
   // printf("text_surface->h: %d\n", text_surface->h);
-  text_rect = &(SDL_Rect){x, y, text_surface->w, text_surface->h};
+  // text_rect = &(SDL_Rect){x, y, text_surface->w, text_surface->h};
+  text_rect->x = x;
+  text_rect->y = y;
+  text_rect->w = text_surface->w;
+  text_rect->h = text_surface->h;
   SDL_RenderCopy(ren_debug, text_texture, NULL, text_rect);
 
   free_text_resources();
 }
+
+int window, row, cur_stack_index;
 
 void update_screen_debug() {
   char text[50];
@@ -185,7 +205,6 @@ void update_screen_debug() {
 
   // render stack
   render_debug_text("STACK:", 160, 2);
-  int cur_stack_index;
   for (int i = 0; i < SIZE_STACK; i++) {
     cur_stack_index = SIZE_STACK - 1 - i;
     if (stack_ptr == cur_stack_index) {
@@ -200,9 +219,9 @@ void update_screen_debug() {
   }
 
   // render program code at program counter
-  int window = 2 * 11;  // num of shorts to render on each side of the program
-                        // counter's short
-  int row = 0;
+  window = 2 * 11;  // num of shorts to render on each side of the program
+                    // counter's short
+  row = 0;
   text_color_white();
   render_debug_text("PROGRAM:", 340, 2);
   for (int i = program_counter - window; i < program_counter + window; i += 2) {

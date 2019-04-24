@@ -334,6 +334,7 @@ void instruction_wait_for_key(unsigned short instruction) {
     if (cur_chip8_key != -1) {
       if (button_keydown[i]) {
         reg[reg_x] = cur_chip8_key;
+        button_keydown[i] = 0;  // clear button after being handled
         return;
       }
     }
@@ -366,6 +367,7 @@ void instruction_add_I_reg(unsigned short instruction) {
 // Set I = location of sprite for digit Vx.
 void instruction_load_sprite(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
+  // printf("Loading sprite at register %x [value: 0x%x]\n", reg_x, reg[reg_x]);
   if (reg[reg_x] < 16) {
     reg_I = reg[reg_x] * 5;
   }
@@ -375,6 +377,12 @@ void instruction_load_sprite(unsigned short instruction) {
 // Store BCD representation of Vx in memory locations I, I+1, and I+2.
 void instruction_load_BCD(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
+
+  // printf("instruction_load_BCD for register %x [value: 0x%x]\n", reg_x,
+  // reg[reg_x]); printf("    %04x: %d\n", reg_I, (reg[reg_x] / 100) % 10);
+  // printf("    %04x: %d\n", reg_I+1, (reg[reg_x] / 10) % 10);
+  // printf("    %04x: %d\n", reg_I+2, reg[reg_x] % 10);
+
   program[reg_I] = (reg[reg_x] / 100) % 10;
   program[reg_I + 1] = (reg[reg_x] / 10) % 10;
   program[reg_I + 2] = reg[reg_x] % 10;
@@ -384,7 +392,8 @@ void instruction_load_BCD(unsigned short instruction) {
 // Store registers V0 through Vx in memory starting at location I.
 void instruction_load_multi(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
-  for (int i = 0; i < reg_x; i++) {
+
+  for (int i = 0; i <= reg_x; i++) {
     program[reg_I + i] = reg[i];
   }
 }
@@ -393,8 +402,10 @@ void instruction_load_multi(unsigned short instruction) {
 // Read registers V0 through Vx from memory starting at location I.
 void instruction_read_multi(unsigned short instruction) {
   unsigned char reg_x = (instruction & 0x0F00) >> 8;
-  for (int i = 0; i < reg_x; i++) {
+  // printf("instruction_read_multi I:%x    reg 0-%x\n", reg_I, reg_x);
+  for (int i = 0; i <= reg_x; i++) {
     reg[i] = program[reg_I + i];
+    // printf("    V%x = %d\n", i, program[reg_I + i]);
   }
 }
 
