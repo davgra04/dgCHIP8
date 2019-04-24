@@ -26,6 +26,23 @@ make clean all
 
 ```
 
+## Controls
+
+The CHIP-8 was designed for a 16-key hexadecimal keypad. This emulator uses the following mapping to a QWERTY keyboard:
+
+```
+ Keypad                  QWERTY
+ --- --- --- ---         --- --- --- ---
+| 1 | 2 | 3 | C |       | 1 | 2 | 3 | 4 |
+ --- --- --- ---         --- --- --- ---
+| 4 | 5 | 6 | D |       | Q | W | E | R |
+ --- --- --- ---    ->   --- --- --- ---
+| 7 | 8 | 9 | E |       | A | S | D | F |
+ --- --- --- ---         --- --- --- ---
+| A | 0 | B | F |       | Z | X | C | V |
+ --- --- --- ---         --- --- --- ---
+```
+
 ## Resources
 
 * [CHIP-8 Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
