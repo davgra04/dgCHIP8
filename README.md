@@ -1,9 +1,10 @@
 dgCHIP8
 =======
 
-![](tetris.gif)
+A CHIP-8 emulator written in C. Includes some public domain CHIP-8 games in the `games/` directory.
 
-A CHIP-8 emulator written in C.
+![](tetris.gif)
+![](invaders.gif)
 
 ## Libraries
 
