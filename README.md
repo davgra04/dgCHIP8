@@ -1,7 +1,7 @@
 dgCHIP8
 =======
 
-A CHIP-8 emulator written in C. Includes some public domain CHIP-8 games in the `games/` directory, and a basic decompiler written in Python under the `tools/` directory.
+A CHIP-8 emulator written in C. Includes some public domain CHIP-8 games in the `games/` directory, and a basic disassembler written in Python under the `tools/` directory.
 
 ![](tetris.gif)
 ![](invaders.gif)
@@ -43,9 +43,9 @@ The CHIP-8 was designed for a 16-key hexadecimal keypad. This emulator uses the 
  --- --- --- ---         --- --- --- ---
 ```
 
-## Running the Decompiler
+## Running the Disassembler
 
-The decompiler is written using Python 3, and requires `argparse` and `pprint` packages.
+The disassembler is written using Python 3, and requires `argparse` and `pprint` packages.
 
 ```bash
 # set up Python virtual environment
@@ -56,8 +56,8 @@ source env/bin/activate
 # install required Python packages
 (env) pip install -r tools/requirements.txt
 
-# run decompiler
-(env) python tools/decompiler.py games/TETRIS
+# run disassembler
+(env) python tools/disassembler.py games/TETRIS
 0x0200    a2b4    ■_■___■_ ■_■■_■__    LD I, 2b4             // Set value of register I to 2b4
 0x0202    23e6    __■___■■ ■■■__■■_    CALL 3e6              // Call subroutine at 0x3e6
 0x0204    22b6    __■___■_ ■_■■_■■_    CALL 2b6              // Call subroutine at 0x2b6

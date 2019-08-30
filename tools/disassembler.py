@@ -157,8 +157,8 @@ def print_instruction(addr, instruction_bytes):
         instruction_desc))
 
 
-parser = argparse.ArgumentParser(description="Decompile a CHIP8 program.")
-parser.add_argument("infile", type=str, help="CHIP8 program to decompile")
+parser = argparse.ArgumentParser(description="Disassemble a CHIP8 program.")
+parser.add_argument("infile", type=str, help="CHIP8 program to disassemble")
 args = parser.parse_args()
 
 program = b""
