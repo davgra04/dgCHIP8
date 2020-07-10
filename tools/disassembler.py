@@ -91,7 +91,7 @@ def print_instruction(addr, instruction_bytes):
         if instruction[3] == "7":
             instruction_str = "SUBN V{0}, V{1}".format(instruction[1], instruction[2])
             instruction_desc = "Set V{0} to V{1} - V{0}, Vf = NOT borrow".format(instruction[1], instruction[2])
-        if instruction[3] == "E":
+        if instruction[3] == "e":
             instruction_str = "SHL V{0}, V{1}".format(instruction[1], instruction[2])
             instruction_desc = "Shift V{0} left by 1 bit, Vf = most significant bit of V{0} before shift".format(instruction[1])
 
